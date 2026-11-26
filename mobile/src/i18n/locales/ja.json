@@ -1956,6 +1956,9 @@
       "requested": "依頼済み",
       "reviewed": "レビュー済み",
       "title": "レビュアー"
+    },
+    "createSheet": {
+      "create": "作成"
     }
   },
   "session": {
