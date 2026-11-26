@@ -14,6 +14,7 @@ import { useDrawerReducedMotion } from '../../components/bottom-drawer/bottom-dr
 import { SETTLE_SPRING } from '../../components/motion/sheet-motion-values'
 import { NavBarBadge } from '../../components/nav-bar/NavBarButton'
 import { useKeyboardPersistingTaps } from '../../platform/keyboard/keyboard-persisting-taps'
+import { useBackEdgeGuard } from '../../navigation/use-back-edge-guard'
 import { useNow } from '../../hooks/use-now'
 import { colors, feedback, spacing } from '../../theme/mobile-theme'
 import { themedStyleSheet } from '../../theme/themed-styles'
@@ -106,6 +107,9 @@ export function MobileSessionTabBar({
     rows.filter((row) => row.tab.id !== activeSessionTabId && row.group === 'needs-you')
   )
   const [sheetOpen, setSheetOpen] = useState(false)
+  // A swipe from the screen's edge on the tab steps tabs; Back keeps the rest of the edge.
+  // An edge swipe moves right, to the previous tab; with none (or sideways, beside Back's chevron) the edge stays Back's.
+  const edgeGuard = useBackEdgeGuard(previous !== undefined && !inTopBar)
   const [dragging, setDragging] = useState(false)
   const stopConfirm = useMobileSessionTabStopConfirm(
     handleCloseSessionTab,
@@ -232,10 +236,12 @@ export function MobileSessionTabBar({
           {/* The bar takes both axes on the web: sideways steps tabs, up opens the switcher. */}
           <GestureDetector gesture={Gesture.Race(pan, swipeUp)} touchAction="none">
             <View
+              ref={edgeGuard.ref}
               style={styles.tabCell}
               // Neighbours sit a whole cell aside, so none shows at rest and each arrives at the same inset.
               onLayout={(event) => {
                 width.value = event.nativeEvent.layout.width
+                edgeGuard.onLayout()
               }}
             >
               <Pressable
